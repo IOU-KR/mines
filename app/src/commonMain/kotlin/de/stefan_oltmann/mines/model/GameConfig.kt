@@ -36,4 +36,7 @@ data class GameConfig(
 
     val mineCount = difficulty.calcMineCount(mapWidth, mapHeight)
 
+    fun clone(): GameConfig{
+        return GameConfig(cellSize,mapWidth,mapHeight,difficulty)
+    }
 }

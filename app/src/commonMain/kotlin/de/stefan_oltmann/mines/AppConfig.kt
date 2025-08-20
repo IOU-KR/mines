@@ -19,13 +19,13 @@
 
 package de.stefan_oltmann.mines
 
-const val APP_TITLE = "Mines 지뢰찾기"
+const val APP_TITLE = "Mines"
 
 const val MIN_CELL_SIZE: Int = 30
 const val MAX_CELL_SIZE: Int = 99
 const val DEFAULT_CELL_SIZE: Int = 40
 
-const val MIN_LONG_SIDE: Int = 2
+const val MIN_LONG_SIDE: Int = 4
 const val MAX_LONG_SIDE: Int = 100
 
 const val FONT_SIZE: Int = 20

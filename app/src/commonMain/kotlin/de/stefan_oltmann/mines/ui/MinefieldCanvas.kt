@@ -76,6 +76,7 @@ private val cellStroke = Stroke(
 
 @Composable
 fun MinefieldCanvas(
+    gameOver: Boolean,
     gameState: GameState,
     gameConfig: MutableState<GameConfig>,
     redrawState: MutableState<Int>,
@@ -217,6 +218,14 @@ fun MinefieldCanvas(
                         style = cellStroke
                     )
 
+                    if(gameOver){
+                        val cellType = gameState.minefield.getCellType(x, y)
+                        if(cellType==CellType.MINE)
+                            drawMine(
+                                topLeft = offset,
+                                size = cellSizeWithDensity
+                            )
+                    }
                     if (gameState.isFlagged(x, y))
                         drawFlag(
                             topLeft = offset,

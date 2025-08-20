@@ -72,7 +72,7 @@ class Minefield(
             return matrix
         }
 
-        private fun createEmptyMatrix(width: Int, height: Int): Array<Array<CellType>> =
+        fun createEmptyMatrix(width: Int, height: Int): Array<Array<CellType>> =
             Array(width) {
                 Array(height) {
                     CellType.EMPTY
@@ -80,7 +80,7 @@ class Minefield(
             }
 
         /* Calculates a centered protected range that scales with board size */
-        fun calcProtectedRange(length: Int): IntRange {
+        private fun calcProtectedRange(length: Int): IntRange {
 
             val targetSize = (length * 0.3).toInt().coerceAtLeast(2)
 
@@ -186,5 +186,6 @@ class Minefield(
 
             return matrix[x][y] == CellType.MINE
         }
+
     }
 }

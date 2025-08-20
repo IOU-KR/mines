@@ -52,6 +52,7 @@ import de.stefan_oltmann.mines.MAX_CELL_SIZE
 import de.stefan_oltmann.mines.MAX_LONG_SIDE
 import de.stefan_oltmann.mines.MIN_CELL_SIZE
 import de.stefan_oltmann.mines.MIN_LONG_SIDE
+import de.stefan_oltmann.mines.model.Game
 import de.stefan_oltmann.mines.model.GameConfig
 import de.stefan_oltmann.mines.model.GameDifficulty
 import de.stefan_oltmann.mines.ui.icons.IconCancel
@@ -76,7 +77,8 @@ fun SettingsDialog(
     gameConfig: GameConfig,
     fontFamily: FontFamily,
     onCancel: () -> Unit,
-    onConfirm: (GameConfig) -> Unit
+    onConfirm: (GameConfig) -> Unit,
+    onSave: () -> Unit
 ) {
 
     val cellSize = remember { mutableStateOf(gameConfig.cellSize.toFloat()) }
@@ -110,7 +112,7 @@ fun SettingsDialog(
                 verticalArrangement = Arrangement.spacedBy(defaultSpacing),
                 modifier = Modifier.doublePadding()
             ) {
-
+                // cell size
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(defaultSpacing),
                     verticalAlignment = Alignment.CenterVertically,
@@ -142,7 +144,7 @@ fun SettingsDialog(
                         modifier = Modifier.widthIn(min = 20.dp)
                     )
                 }
-
+                // width slider
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(defaultSpacing),
                     verticalAlignment = Alignment.CenterVertically,
@@ -174,7 +176,7 @@ fun SettingsDialog(
                         modifier = Modifier.widthIn(min = 20.dp)
                     )
                 }
-
+                // height slider
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(defaultSpacing),
                     verticalAlignment = Alignment.CenterVertically,
@@ -206,7 +208,7 @@ fun SettingsDialog(
                         modifier = Modifier.widthIn(min = 20.dp)
                     )
                 }
-
+                // mines
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(defaultSpacing)
                 ) {
@@ -324,16 +326,40 @@ fun SettingsDialog(
                 )
 
                 HalfSpacer()
-
+                // cancel or done
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(defaultSpacing)
                 ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .height(buttonSize)
+                            .weight(0.33f)
+                            .background(colorCellHidden, defaultRoundedCornerShape)
+                            .noRippleClickable(onSave)
+                    )  {
+
+                        Text(
+                            text = "Save Game",
+                            fontFamily = fontFamily,
+                            color = colorForeground,
+                            fontSize = FONT_SIZE.sp
+                        )
+                        //TODO: save icon
+                        /*
+                        Icon(
+                            imageVector = IconMines,
+                            contentDescription = null,
+                            tint = colorForeground,
+                            modifier = Modifier.size(20.dp)
+                        )*/
+                    }
 
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .height(buttonSize)
-                            .weight(0.5f)
+                            .weight(0.33f)
                             .background(colorCellHidden, defaultRoundedCornerShape)
                             .noRippleClickable(onCancel)
                     ) {
@@ -349,7 +375,7 @@ fun SettingsDialog(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .height(buttonSize)
-                            .weight(0.5f)
+                            .weight(0.33f)
                             .background(colorCellHidden, defaultRoundedCornerShape)
                             .noRippleClickable {
                                 onConfirm(

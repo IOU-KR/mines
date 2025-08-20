@@ -181,4 +181,24 @@ class Game {
 
         gameState.toggleFlag(x, y)
     }
+    // for save game
+    override fun toString(): String {
+        //${_elapsedSeconds.value} ${gameState}
+        return _elapsedSeconds.value.toString()+" "+gameState.toString()
+    }
+    companion object {
+        // for load saved game
+        fun parseString(game: String): Game {
+            val i = game.indexOf(' ')
+            val out = Game()
+            out._elapsedSeconds.value = game.substring(0,i).toLong()
+            //isTimerRunning = false
+            //_elapsedSeconds.value = game.substring(0,i).toLong()
+
+            //gameOver = false
+            //gameWon = false
+            out.gameState = GameState.parseString(game.substring(i+1))
+            return out
+        }
+    }
 }

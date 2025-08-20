@@ -71,18 +71,28 @@ fun App() {
 
     val fontFamily = EconomicaFontFamily()
 
-    val game = remember { Game() }
+    val game = remember {
+        val gameString: String? = settings["mines_game"]
+        println(gameString)
+        if (gameString==null) Game() else Game.parseString(gameString)
+    }
+
+
 
     val gameConfig = remember {
         mutableStateOf(
-            GameConfig(
-                cellSize = settings["mines_cell_size"] ?: DEFAULT_CELL_SIZE,
-                mapWidth = settings["mines_map_width"] ?: defaultMapWidth,
-                mapHeight = settings["mines_map_height"] ?: defaultMapHeight,
-                difficulty = GameDifficulty.valueOf(settings["mines_difficulty"] ?: GameDifficulty.EASY.name)
-            )
+            if (game.gameState==null)
+                GameConfig(
+                    cellSize =  DEFAULT_CELL_SIZE,
+                    mapWidth = defaultMapWidth,
+                    mapHeight = defaultMapHeight,
+                    difficulty = GameDifficulty.EASY
+                )
+            else
+                game.minefield!!.config.clone()
         )
     }
+    var oldGameConfig = gameConfig.value.clone()
 
     val redrawState = remember { mutableStateOf(0) }
 
@@ -116,8 +126,6 @@ fun App() {
      */
     LaunchedEffect(Unit) {
 
-        game.restart(gameConfig.value)
-
         /* Trigger scrolling to the middle of the field */
         scrollToMiddleTrigger.value += 1
     }
@@ -126,25 +134,27 @@ fun App() {
 
         val newGameConfig = gameConfig.value
 
-        val oldMapWidth = settings["mines_map_width"] ?: defaultMapWidth
-        val oldMapHeight = settings["mines_map_height"] ?: defaultMapHeight
-        val oldDifficulty = GameDifficulty.valueOf(settings["mines_difficulty"] ?: GameDifficulty.EASY.name)
+        //val oldMapWidth = settings["mines_map_width"] ?: defaultMapWidth
+        //val oldMapHeight = settings["mines_map_height"] ?: defaultMapHeight
+        //val oldDifficulty = GameDifficulty.valueOf(settings["mines_difficulty"] ?: GameDifficulty.EASY.name)
 
         /* Save new settings to config */
-        settings["mines_cell_size"] = newGameConfig.cellSize
-        settings["mines_map_width"] = newGameConfig.mapWidth
-        settings["mines_map_height"] = newGameConfig.mapHeight
-        settings["mines_difficulty"] = newGameConfig.difficulty.name
+        //settings["mines_cell_size"] = newGameConfig.cellSize
+        //settings["mines_map_width"] = newGameConfig.mapWidth
+        //settings["mines_map_height"] = newGameConfig.mapHeight
+        //settings["mines_difficulty"] = newGameConfig.difficulty.name
 
         val mapSettingsChanged =
-            oldMapWidth != newGameConfig.mapWidth ||
-                oldMapHeight != newGameConfig.mapHeight ||
-                oldDifficulty != newGameConfig.difficulty
+            oldGameConfig.mapWidth != newGameConfig.mapWidth ||
+                oldGameConfig.mapHeight != newGameConfig.mapHeight ||
+                oldGameConfig.difficulty != newGameConfig.difficulty
 
         /* Launch a new game every time the settings change something that influences the map */
         if (mapSettingsChanged) {
+            oldGameConfig = newGameConfig.clone()
 
             game.restart(gameConfig.value)
+            settings["mines_game"] = game.toString()
 
             /* Trigger scrolling to the middle of the field */
             scrollToMiddleTrigger.value += 1
@@ -241,6 +251,7 @@ fun App() {
                             if (gameState != null) {
 
                                 MinefieldCanvas(
+                                    game.gameOver,
                                     gameState,
                                     gameConfig,
                                     redrawState,
@@ -291,6 +302,10 @@ fun App() {
                         showSettings.value = false
 
                         gameConfig.value = newGameSettings
+                    },
+                    onSave = {
+                        if (!game.gameOver && !game.gameWon)
+                            settings["mines_game"] = game.toString()
                     }
                 )
         }

@@ -22,9 +22,9 @@ package de.stefan_oltmann.mines.model
 enum class CellType(
     val adjacentMineCount: Int
 ) {
-
+    //! DO NOT USE 9 for `adjacentMineCount` see: GameState.toString()
     EMPTY(0),
-    MINE(-1),
+    MINE(-1), //! DO NOT CHANGE `adjacentMineCount` see: GameState.toString()
     ONE(1),
     TWO(2),
     THREE(3),
@@ -35,9 +35,11 @@ enum class CellType(
     EIGHT(8);
 
     companion object {
-
-        fun ofMineCount(mineCount: Int): CellType =
-            when (mineCount) {
+        val CellTypeMap: Map<Int, CellType> by lazy {
+            entries.associateBy { it.adjacentMineCount }
+        }
+        fun ofMineCount(mineCount: Int): CellType = CellTypeMap[mineCount]?: run{EMPTY}
+            /*when (mineCount) {
                 0 -> EMPTY
                 1 -> ONE
                 2 -> TWO
@@ -48,6 +50,6 @@ enum class CellType(
                 7 -> SEVEN
                 8 -> EIGHT
                 else -> EMPTY
-            }
+            }*/
     }
 }
