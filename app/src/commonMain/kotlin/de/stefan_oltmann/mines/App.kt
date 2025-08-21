@@ -81,14 +81,16 @@ fun App() {
 
     val gameConfig = remember {
         mutableStateOf(
-            if (game.gameState==null)
-                GameConfig(
+            if (game.gameState==null) {
+		        val out = GameConfig(
                     cellSize =  DEFAULT_CELL_SIZE,
                     mapWidth = defaultMapWidth,
                     mapHeight = defaultMapHeight,
                     difficulty = GameDifficulty.EASY
                 )
-            else
+                game.restart(out)
+                out
+	        } else
                 game.minefield!!.config.clone()
         )
     }
