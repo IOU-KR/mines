@@ -123,8 +123,8 @@ android {
         if (androidGitVersion.code() == 0) {
 
             /* Values for the dev version. */
-            versionName = "0.0.0"
-            versionCode = 0
+            versionName = "1.0.0"
+            versionCode = 10000
 
         } else {
 
@@ -169,7 +169,7 @@ compose.desktop {
             if (androidGitVersion.code() == 0) {
 
                 /* Values for the dev version. */
-                packageVersion = "0.0.0"
+                packageVersion = "1.0.0"
 
             } else {
 
