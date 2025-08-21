@@ -24,7 +24,7 @@ enum class CellType(
 ) {
     //! DO NOT USE 9 for `adjacentMineCount` see: GameState.toString()
     EMPTY(0),
-    MINE(-1), //! DO NOT CHANGE `adjacentMineCount` see: GameState.toString()
+    MINE(-1),
     ONE(1),
     TWO(2),
     THREE(3),
@@ -39,17 +39,5 @@ enum class CellType(
             entries.associateBy { it.adjacentMineCount }
         }
         fun ofMineCount(mineCount: Int): CellType = CellTypeMap[mineCount]?: run{EMPTY}
-            /*when (mineCount) {
-                0 -> EMPTY
-                1 -> ONE
-                2 -> TWO
-                3 -> THREE
-                4 -> FOUR
-                5 -> FIVE
-                6 -> SIX
-                7 -> SEVEN
-                8 -> EIGHT
-                else -> EMPTY
-            }*/
     }
 }

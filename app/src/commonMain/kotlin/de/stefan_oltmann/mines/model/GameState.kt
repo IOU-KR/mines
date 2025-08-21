@@ -236,7 +236,7 @@ class GameState(
         var flaggedMatrixString = ":"
         for (x in 0 until minefield.width) {
             for (y in 0 until minefield.height) {
-                minefieldString += if (minefield.matrix[x][y].adjacentMineCount==-1) 9 else minefield.matrix[x][y].adjacentMineCount
+                minefieldString += if (minefield.matrix[x][y]==CellType.MINE) 9 else minefield.matrix[x][y].adjacentMineCount
                 revealedMatrixString += if (revealedMatrix[x][y]) '1' else '0'
                 flaggedMatrixString += if (flaggedMatrix[x][y]) '1' else '0'
             }
