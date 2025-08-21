@@ -73,7 +73,6 @@ fun App() {
 
     val game = remember {
         val gameString: String? = settings["mines_game"]
-        println(gameString)
         if (gameString==null) Game() else Game.parseString(gameString)
     }
 
@@ -156,7 +155,6 @@ fun App() {
             oldGameConfig = newGameConfig.clone()
 
             game.restart(gameConfig.value)
-            settings["mines_game"] = game.toString()
 
             /* Trigger scrolling to the middle of the field */
             scrollToMiddleTrigger.value += 1
