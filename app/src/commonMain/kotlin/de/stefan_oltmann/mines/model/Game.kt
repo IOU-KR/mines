@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlin.time.Duration.Companion.seconds
 
 private val gameStateScope = CoroutineScope(Dispatchers.Default)
 
@@ -59,8 +60,7 @@ class Game {
         isTimerRunning = true
 
         gameStateScope.launch {
-
-            gameStartTime = Clock.System.now()
+            gameStartTime = Clock.System.now() - _elapsedSeconds.value.seconds
 
             while (isTimerRunning) {
 

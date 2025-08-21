@@ -81,9 +81,11 @@ class Minefield(
 
         /* Calculates a centered protected range that scales with board size */
         private fun calcProtectedRange(length: Int): IntRange {
-
-            val targetSize = (length * 0.3).toInt().coerceAtLeast(2)
-
+            if (length == 0)
+                return 0..0
+            var targetSize = (length * 0.3).toInt()
+            if (length >= 4)
+                targetSize = targetSize.coerceAtLeast(2)
             val protectedSize =
                 if (targetSize % 2 == length % 2)
                     targetSize

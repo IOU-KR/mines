@@ -94,7 +94,7 @@ fun App() {
                 game.minefield!!.config.clone()
         )
     }
-    var oldGameConfig = gameConfig.value.clone()
+    var oldGameConfig = remember{gameConfig.value.clone()}
 
     val redrawState = remember { mutableStateOf(0) }
 
