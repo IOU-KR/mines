@@ -336,7 +336,10 @@ fun SettingsDialog(
                             .height(buttonSize)
                             .weight(0.33f)
                             .background(colorCellHidden, defaultRoundedCornerShape)
-                            .noRippleClickable(onSave)
+                            .noRippleClickable({
+                                onSave()
+                                onCancel()
+                            })
                     )  {
 
                         Text(
