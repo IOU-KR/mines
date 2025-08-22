@@ -123,8 +123,8 @@ android {
         if (androidGitVersion.code() == 0) {
 
             /* Values for the dev version. */
-            versionName = "1.0.0"
-            versionCode = 10000
+            versionName = "1.0.1"
+            versionCode = 10001
 
         } else {
 
@@ -143,8 +143,12 @@ android {
         getByName("release") {
             /*
              * As an open source project we don't need ProGuard.
+             *
+             * [Note] Enabled minification for release builds to reduce APK size
+             * for end-users. The source code remains fully open under GPL 3.0.
              */
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+	        isShrinkResources = true
         }
     }
 
@@ -169,7 +173,7 @@ compose.desktop {
             if (androidGitVersion.code() == 0) {
 
                 /* Values for the dev version. */
-                packageVersion = "1.0.0"
+                packageVersion = "1.0.1"
 
             } else {
 
