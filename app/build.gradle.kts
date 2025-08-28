@@ -34,6 +34,7 @@ kotlin {
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
+        binaries.executable()
 
         outputModuleName = "app"
 
@@ -43,6 +44,8 @@ kotlin {
             val projectDirPath = project.projectDir.path
 
             commonWebpackConfig {
+                mode = KotlinWebpackConfig.Mode.PRODUCTION
+
                 outputFileName = "app.js"
                 devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
                     static = (static ?: mutableListOf()).apply {
@@ -148,7 +151,7 @@ android {
              * for end-users. The source code remains fully open under GPL 3.0.
              */
             isMinifyEnabled = true
-	        isShrinkResources = true
+            isShrinkResources = true
         }
     }
 
