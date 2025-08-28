@@ -21,6 +21,34 @@ package de.stefan_oltmann.mines.model
 
 import kotlin.random.Random
 
+class RandomCoordinateExcludingRect(
+    val widthRange: IntRange,
+    val heightRange: IntRange,
+    val excludedRectXRange: IntRange,
+    val excludedRectYRange: IntRange,
+    val random: Random
+) {
+
+    private val validCoordinates = mutableListOf<Pair<Int, Int>>()
+
+    init {
+        for (x in widthRange) {
+            for (y in heightRange) {
+                if (x !in excludedRectXRange || y !in excludedRectYRange) {
+                    validCoordinates.add(Pair(x, y))
+                }
+            }
+        }
+    }
+
+    fun nextCoordinate(): Pair<Int, Int>? {
+        if (validCoordinates.isEmpty()) {
+            return null
+        }
+        return validCoordinates.random(random)
+    }
+}
+
 class Minefield(
     val config: GameConfig,
     val seed: Int,
@@ -81,7 +109,7 @@ class Minefield(
 
         /* Calculates a centered protected range that scales with board size */
         private fun calcProtectedRange(length: Int): IntRange {
-            if (length == 0)
+            if (length < 3)
                 return 0..0
             var targetSize = (length * 0.3).toInt()
             if (length >= 4)
@@ -97,6 +125,46 @@ class Minefield(
             return start until (start + protectedSize)
         }
 
+        /*private fun placeMines(
+            matrix: Array<Array<CellType>>,
+            width: Int,
+            height: Int,
+            mineCount: Int,
+            seed: Int
+        ) {
+
+            val protectedXRange = calcProtectedRange(width)
+            val protectedYRange = calcProtectedRange(height)
+
+            /*
+             * Mines are placed according to seed to reproduce results.
+             */
+            val random = Random(seed)
+            val xRandom = RandomExcludingRange(0 until width, protectedXRange, random)
+            val yRandom = RandomExcludingRange(0 until height, protectedYRange, random)
+
+            var placedMinesCount = 0
+
+            while (placedMinesCount < mineCount) {
+
+                val x = xRandom.nextInt()
+                val y = yRandom.nextInt()
+
+                /*
+                 * Only place mines into empty cells.
+                 *
+                 * This guarantees that we have enough mines,
+                 * even if the randomizer selects the same cell twice.
+                 */
+                if (matrix[x][y] == CellType.EMPTY) {
+
+                    matrix[x][y] = CellType.MINE
+
+                    placedMinesCount++
+                }
+                println(placedMinesCount)
+            }
+        }*/
         private fun placeMines(
             matrix: Array<Array<CellType>>,
             width: Int,
@@ -105,26 +173,27 @@ class Minefield(
             seed: Int
         ) {
 
-            /*
-             * Mines are placed according to seed to reproduce results.
-             */
-            val random = Random(seed)
-
             val protectedXRange = calcProtectedRange(width)
             val protectedYRange = calcProtectedRange(height)
+
+            val random = Random(seed)
+            val randomCoordinateGenerator = RandomCoordinateExcludingRect(
+                widthRange = 0 until width,
+                heightRange = 0 until height,
+                excludedRectXRange = protectedXRange,
+                excludedRectYRange = protectedYRange,
+                random = random
+            )
 
             var placedMinesCount = 0
 
             while (placedMinesCount < mineCount) {
 
-                val x = random.nextInt(width)
-                val y = random.nextInt(height)
+                val coordinate = randomCoordinateGenerator.nextCoordinate()
+                if (coordinate == null)
+                    break
 
-                /*
-                 * Keep the middle free of mines to give players a starting point.
-                 */
-                if (x in protectedXRange && y in protectedYRange)
-                    continue
+                val (x, y) = coordinate
 
                 /*
                  * Only place mines into empty cells.
@@ -140,6 +209,7 @@ class Minefield(
                 }
             }
         }
+
 
         private fun placeCounts(
             matrix: Array<Array<CellType>>,

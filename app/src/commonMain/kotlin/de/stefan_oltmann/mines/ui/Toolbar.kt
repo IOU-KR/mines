@@ -47,15 +47,19 @@ import de.stefan_oltmann.mines.ui.theme.DoubleSpacer
 import de.stefan_oltmann.mines.ui.theme.HalfSpacer
 import de.stefan_oltmann.mines.ui.theme.buttonSize
 import de.stefan_oltmann.mines.ui.theme.colorForeground
+import de.stefan_oltmann.mines.ui.theme.colorMine
 
 @Composable
 fun Toolbar(
     highlightRestartButton: Boolean,
+    hintActivated: Boolean,
     elapsedSeconds: Long,
     remainingFlagsCount: Int,
+    remainingHintsCount: Int,
     fontFamily: FontFamily,
     showSettings: () -> Unit,
-    restartGame: () -> Unit
+    restartGame: () -> Unit,
+    activateHint: () -> Unit
 ) {
 
     Row(
@@ -150,5 +154,32 @@ fun Toolbar(
             textAlign = TextAlign.Right,
             modifier = Modifier.widthIn(min = 20.dp)
         )
+
+        DoubleSpacer()
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(buttonSize)
+                .noRippleClickable(onClick = activateHint)
+        ){
+            //TODO: Change imageVector
+            Icon(
+                imageVector = IconFlag,
+                contentDescription = null,
+                tint = if (hintActivated) Color.Yellow else colorMine
+            )
+        }
+
+        Text(
+            text = remainingHintsCount.toString(),
+            fontFamily = fontFamily,
+            color = if (hintActivated) Color.Yellow else colorForeground,
+            fontSize = FONT_SIZE.sp,
+            textAlign = TextAlign.Right,
+            modifier = Modifier.widthIn(min = 20.dp)
+        )
+
+        DoubleSpacer()
     }
 }

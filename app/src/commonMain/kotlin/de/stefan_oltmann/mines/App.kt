@@ -76,6 +76,7 @@ fun App() {
         if (gameString==null) Game() else Game.parseString(gameString)
     }
 
+    val hintActivated = remember { mutableStateOf(false) }
 
 
     val gameConfig = remember {
@@ -220,8 +221,10 @@ fun App() {
 
                     Toolbar(
                         highlightRestartButton = game.gameOver || game.gameWon,
+                        hintActivated = hintActivated.value,
                         elapsedSeconds = elapsedSeconds,
                         remainingFlagsCount = game.gameState?.getRemainingFlagsCount() ?: 0,
+                        remainingHintsCount = game.remainingHints.collectAsState().value,
                         fontFamily = fontFamily,
                         showSettings = {
                             showSettings.value = true
@@ -235,6 +238,12 @@ fun App() {
 
                             /* Trigger scrolling to the middle of the field */
                             scrollToMiddleTrigger.value += 1
+                        },
+                        activateHint = {
+                            hintActivated.value = !hintActivated.value
+
+                            /* FIXME This is a hack */
+                            redrawState.value += 1
                         }
                     )
 
@@ -257,7 +266,8 @@ fun App() {
                                     redrawState,
                                     fontFamily,
                                     hit = { x, y -> game.hit(x, y) },
-                                    flag = { x, y -> game.flag(x, y) }
+                                    flag = { x, y -> game.flag(x, y) },
+                                    hint = { x, y -> if (hintActivated.value) game.hint(x, y) }
                                 )
                             }
                         }

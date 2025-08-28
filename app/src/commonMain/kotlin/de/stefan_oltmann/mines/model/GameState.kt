@@ -39,11 +39,17 @@ class GameState(
         Array(minefield.height) {
             false
         }
-    }
+    },
+    private val hintFlaggedMatrix: Array<Array<Boolean>> =
+        Array(minefield.width) {
+            Array(minefield.height) {
+                false
+            }
+        }
 ) {
 
     fun getRemainingFlagsCount(): Int =
-        minefield.config.mineCount - flaggedMatrix.flatten().count { it }
+        minefield.config.mineCount - flaggedMatrix.flatten().count { it } - hintFlaggedMatrix.flatten().count { it }
 
     fun isRevealed(x: Int, y: Int): Boolean =
         revealedMatrix[x][y]
@@ -72,6 +78,7 @@ class GameState(
 
         /* Remove any flags that may have set on non-minefields. */
         flaggedMatrix[x][y] = false
+        hintFlaggedMatrix[x][y] = false
 
         /* If the cell is empty, recursively reveal adjacent cells */
         if (minefield.getCellType(x, y) == CellType.EMPTY) {
@@ -130,10 +137,33 @@ class GameState(
     }
 
     fun isFlagged(x: Int, y: Int): Boolean =
-        flaggedMatrix[x][y]
+        flaggedMatrix[x][y] || hintFlaggedMatrix[x][y]
+
+    fun isHintFlagged(x: Int, y: Int): Boolean =
+        hintFlaggedMatrix[x][y]
 
     fun toggleFlag(x: Int, y: Int) {
+        if (hintFlaggedMatrix[x][y])
+            return
         flaggedMatrix[x][y] = !flaggedMatrix[x][y]
+    }
+
+    fun hint(x: Int, y: Int) {
+        if (!isRevealed(x, y))
+            if (minefield.isMine(x, y))
+                hintFlaggedMatrix[x][y] = true
+            else
+                reveal(x, y)
+
+        performOnAdjacentCells(x, y){
+                adjX, adjY ->
+            if (isRevealed(adjX, adjY))
+                return@performOnAdjacentCells
+            if (minefield.isMine(adjX, adjY))
+                hintFlaggedMatrix[adjX][adjY] = true
+            else
+                reveal(adjX, adjY)
+        }
     }
 
     fun flagAllMines() {
@@ -174,7 +204,8 @@ class GameState(
         // for load saved game
         fun parseString(gameState: String): GameState{
 
-            //${cellSize},${difficulty},${width}x${height}:${minefield}:${revealedMatrix}:${flaggedMatrix}
+            //${cellSize},${difficulty},${width}x${height}:${minefield}:${revealedMatrix}:${flaggedMatrix}:${hintFlaggedMatrix}
+
             var i = gameState.indexOf(',')
             val cellSize = gameState.substring(0, i).toInt()
 
@@ -200,7 +231,11 @@ class GameState(
             val revealedMatrixString = gameState.substring(i, j)
 
             j++
-            val flaggedMatrixString = gameState.substring(j)
+            i = gameState.indexOf(':', j)
+            val flaggedMatrixString = gameState.substring(j, i)
+
+            i++
+            val hintFlaggedMatrixString = gameState.substring(i)
 
 
             val matrix = createEmptyMatrix(width, height)
@@ -214,6 +249,11 @@ class GameState(
                     false
                 }
             }
+            val hintFlaggedMatrix = Array(width) {
+                Array(height) {
+                    false
+                }
+            }
             i = 0
             for (x in 0 until width) {
                 for (y in 0 until height) {
@@ -221,26 +261,29 @@ class GameState(
                     matrix[x][y] = CellType.ofMineCount(if (mine==9) -1 else mine)
                     revealedMatrix[x][y] = revealedMatrixString[i]=='1'
                     flaggedMatrix[x][y] = flaggedMatrixString[i]=='1'
+                    hintFlaggedMatrix[x][y] = hintFlaggedMatrixString[i]=='1'
                     i++
                 }
             }
-            return GameState(Minefield(GameConfig(cellSize,width,height,difficulty),/*TODO*/0,matrix),revealedMatrix,flaggedMatrix)
+            return GameState(Minefield(GameConfig(cellSize,width,height,difficulty),/*TODO*/0,matrix),revealedMatrix,flaggedMatrix,hintFlaggedMatrix)
         }
     }
     // for save game
     override fun toString(): String {
-        //${cellSize},${difficulty.name},${width}x${height}:${minefield}:${revealedMatrix}:${flaggedMatrix}
+        //${cellSize},${difficulty},${width}x${height}:${minefield}:${revealedMatrix}:${flaggedMatrix}:${hintFlaggedMatrix}
         val out = minefield.config.cellSize.toString()+","+minefield.config.difficulty.name+","+minefield.width+"x"+minefield.height
         var minefieldString = ":"
         var revealedMatrixString = ":"
         var flaggedMatrixString = ":"
+        var hintFlaggedMatrixString = ":"
         for (x in 0 until minefield.width) {
             for (y in 0 until minefield.height) {
                 minefieldString += if (minefield.matrix[x][y]==CellType.MINE) 9 else minefield.matrix[x][y].adjacentMineCount
                 revealedMatrixString += if (revealedMatrix[x][y]) '1' else '0'
                 flaggedMatrixString += if (flaggedMatrix[x][y]) '1' else '0'
+                hintFlaggedMatrixString += if (hintFlaggedMatrix[x][y]) '1' else '0'
             }
         }
-        return out+minefieldString+revealedMatrixString+flaggedMatrixString
+        return out+minefieldString+revealedMatrixString+flaggedMatrixString+hintFlaggedMatrixString
     }
 }

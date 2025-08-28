@@ -82,7 +82,8 @@ fun MinefieldCanvas(
     redrawState: MutableState<Int>,
     fontFamily: FontFamily,
     hit: (Int, Int) -> Unit,
-    flag: (Int, Int) -> Unit
+    flag: (Int, Int) -> Unit,
+    hint: (Int, Int) -> Unit
 ) {
 
     val textMeasurer = rememberTextMeasurer()
@@ -148,6 +149,14 @@ fun MinefieldCanvas(
                         tryAwaitRelease()
 
                         pressedPosition.value = null
+                    },
+                    onDoubleTap = { position ->
+                        val x = (position.x / cellSizeWithDensity.width).toInt()
+                        val y = (position.y / cellSizeWithDensity.height).toInt()
+
+                        hint(x, y)
+
+                        redrawState.value += 1
                     },
                     longPressTimeoutMillis = LONG_PRESS_TIMEOUT_MS
                 )
@@ -226,7 +235,12 @@ fun MinefieldCanvas(
                                 size = cellSizeWithDensity
                             )
                     }
-                    if (gameState.isFlagged(x, y))
+                    if (gameState.isHintFlagged(x, y))
+                        drawHintFlag(
+                            topLeft = offset,
+                            size = innerCellSizeWithDensity
+                        )
+                    else if (gameState.isFlagged(x, y))
                         drawFlag(
                             topLeft = offset,
                             size = innerCellSizeWithDensity
@@ -473,5 +487,52 @@ private fun DrawScope.drawFlag(
     drawPath(
         path = flagPath,
         color = colorForeground
+    )
+}
+
+private fun DrawScope.drawHintFlag(
+    topLeft: Offset,
+    size: Size,
+) {
+
+    val poleHeight = size.height * 0.5f
+    val poleWidth = size.width * 0.1f
+    val flagWidth = size.width * 0.25f
+    val flagHeight = size.height * 0.25f
+
+    /* Calculate the centered position */
+    val centerX = topLeft.x + size.width / 2
+    val centerY = topLeft.y + size.height / 2
+
+    /* Adjust so that the pole starts at the bottom center */
+    val poleStartX = centerX - (poleWidth + flagWidth) / 2
+    val poleStartY = centerY - poleHeight / 2
+    val poleEndY = centerY + poleHeight / 2
+
+    val flagStartX = poleStartX + poleWidth
+
+    /* Define the flag shape with two jagged edges */
+    val flagPath = Path().apply {
+
+        moveTo(poleStartX, poleStartY)
+        lineTo(poleStartX, poleEndY)
+        lineTo(poleStartX + poleWidth, poleEndY)
+        lineTo(poleStartX + poleWidth, poleStartY)
+
+        /* Start flag slightly to the right of the pole */
+        moveTo(flagStartX, poleStartY)
+
+        lineTo(flagStartX + flagWidth, poleStartY)
+        lineTo(flagStartX + flagWidth * 0.6f, poleStartY + flagHeight * 0.5f)
+        lineTo(flagStartX + flagWidth, poleStartY + flagHeight)
+        lineTo(flagStartX, poleStartY + flagHeight)
+
+        close()
+    }
+
+    /* Draw the entire shape */
+    drawPath(
+        path = flagPath,
+        color = colorMine
     )
 }

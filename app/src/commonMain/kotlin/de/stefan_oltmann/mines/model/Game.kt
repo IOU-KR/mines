@@ -35,6 +35,9 @@ private val gameStateScope = CoroutineScope(Dispatchers.Default)
 
 class Game {
 
+    private val _remainingHints = MutableStateFlow(3)
+    val remainingHints = _remainingHints.asStateFlow()
+
     private val _elapsedSeconds = MutableStateFlow(0L)
     val elapsedSeconds = _elapsedSeconds.asStateFlow()
 
@@ -85,6 +88,7 @@ class Game {
 
         isTimerRunning = false
         _elapsedSeconds.value = 0
+        _remainingHints.value = 3 //TODO: dynamic
 
         gameOver = false
         gameWon = false
@@ -183,23 +187,47 @@ class Game {
 
         gameState.toggleFlag(x, y)
     }
+    fun hint(x: Int, y: Int) {
+
+        val gameState = gameState ?: return
+
+        /* Ignore further inputs if game ended. */
+        if (gameOver || gameWon)
+            return
+
+        /* Start timer on first interaction after reset. */
+        if (!isTimerRunning)
+            startTimer()
+
+        /* Only non-revealed fields. */
+        if (gameState.isRevealed(x, y))
+            return
+
+        if(_remainingHints.value<=0)
+            return
+
+
+        gameState.hint(x, y)
+        _remainingHints.value--
+    }
     // for save game
     override fun toString(): String {
-        //${_elapsedSeconds.value} ${gameState}
-        return _elapsedSeconds.value.toString()+" "+gameState.toString()
+        //${_elapsedSeconds.value} ${_remainingHints.value} ${gameState}
+        return _elapsedSeconds.value.toString()+" "+_remainingHints.value+" "+gameState.toString()
     }
     companion object {
         // for load saved game
         fun parseString(game: String): Game {
-            val i = game.indexOf(' ')
-            val out = Game()
-            out._elapsedSeconds.value = game.substring(0,i).toLong()
-            //isTimerRunning = false
-            //_elapsedSeconds.value = game.substring(0,i).toLong()
 
-            //gameOver = false
-            //gameWon = false
-            out.gameState = GameState.parseString(game.substring(i+1))
+            val i = game.indexOf(' ')
+            val j = game.indexOf(' ', i+1)
+
+            val out = Game()
+
+            out._elapsedSeconds.value = game.substring(0,i).toLong()
+            out._remainingHints.value = game.substring(i+1,j).toInt()
+
+            out.gameState = GameState.parseString(game.substring(j+1))
             return out
         }
     }
