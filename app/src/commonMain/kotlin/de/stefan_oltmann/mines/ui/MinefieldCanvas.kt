@@ -82,8 +82,7 @@ fun MinefieldCanvas(
     redrawState: MutableState<Int>,
     fontFamily: FontFamily,
     hit: (Int, Int) -> Unit,
-    flag: (Int, Int) -> Unit,
-    hint: (Int, Int) -> Unit
+    flag: (Int, Int) -> Unit
 ) {
 
     val textMeasurer = rememberTextMeasurer()
@@ -149,14 +148,6 @@ fun MinefieldCanvas(
                         tryAwaitRelease()
 
                         pressedPosition.value = null
-                    },
-                    onDoubleTap = { position ->
-                        val x = (position.x / cellSizeWithDensity.width).toInt()
-                        val y = (position.y / cellSizeWithDensity.height).toInt()
-
-                        hint(x, y)
-
-                        redrawState.value += 1
                     },
                     longPressTimeoutMillis = LONG_PRESS_TIMEOUT_MS
                 )

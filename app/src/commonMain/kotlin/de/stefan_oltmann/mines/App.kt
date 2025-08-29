@@ -265,9 +265,14 @@ fun App() {
                                     gameConfig,
                                     redrawState,
                                     fontFamily,
-                                    hit = { x, y -> game.hit(x, y) },
+                                    hit = { x, y ->
+                                            if (hintActivated.value){
+                                                game.hint(x, y)
+                                                hintActivated.value = false
+                                            } else
+                                                game.hit(x, y)
+                                          },
                                     flag = { x, y -> game.flag(x, y) },
-                                    hint = { x, y -> if (hintActivated.value) game.hint(x, y) }
                                 )
                             }
                         }
